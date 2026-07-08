@@ -335,6 +335,7 @@ type SlackConversationContext = {
   isRoomish: boolean;
   channelConfig: ReturnType<typeof resolveSlackChannelConfig> | null;
   allowBotsMode: "off" | "all" | "mentions";
+  skipBotRoomAuthorization: boolean;
   isBotMessage: boolean;
 };
 
@@ -514,6 +515,10 @@ async function resolveSlackConversationContext(params: {
     false;
   const allowBotsMode: "off" | "all" | "mentions" =
     allowBotsSetting === "mentions" ? "mentions" : allowBotsSetting ? "all" : "off";
+  // Explicit `allowBots: "all"` opts out of the bot room authorization gate
+  // (per-room `users` allowlist / owner-presence check). `allowBots: true`
+  // keeps the gated behavior for backwards compatibility.
+  const skipBotRoomAuthorization = allowBotsSetting === "all";
 
   return {
     channelInfo,
@@ -525,6 +530,7 @@ async function resolveSlackConversationContext(params: {
     isRoomish,
     channelConfig,
     allowBotsMode,
+    skipBotRoomAuthorization,
     isBotMessage: Boolean(message.bot_id),
   };
 }
@@ -1011,6 +1017,7 @@ export async function prepareSlackMessage(params: {
     isRoom &&
     isBotMessage &&
     allowBotsMode !== "off" &&
+    !conversation.skipBotRoomAuthorization &&
     !(await authorizeSlackBotRoomMessage({
       ctx,
       channelId: message.channel,

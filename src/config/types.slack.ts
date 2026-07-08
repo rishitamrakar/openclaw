@@ -55,7 +55,7 @@ export type SlackChannelConfig = {
   tools?: GroupToolPolicyConfig;
   toolsBySender?: GroupToolPolicyBySenderConfig;
   /** Allow bot-authored messages to trigger replies (default: false). Set to "mentions" to only allow bot messages that @mention this bot. */
-  allowBots?: boolean | "mentions";
+  allowBots?: boolean | "mentions" | "all";
   /** Sliding-window bot-pair loop guard for accepted bot-authored Slack messages. */
   botLoopProtection?: ChannelBotLoopProtectionConfig;
   /** Allowlist of users that can invoke the bot in this channel. */
@@ -187,7 +187,7 @@ export type SlackAccountConfig = {
   /** If true, restrict user token to read operations only. Default: true. */
   userTokenReadOnly?: boolean;
   /** Allow bot-authored messages to trigger replies (default: false). Set to "mentions" to only allow bot messages that @mention this bot. */
-  allowBots?: boolean | "mentions";
+  allowBots?: boolean | "mentions" | "all";
   /** Sliding-window bot-pair loop guard for accepted bot-authored Slack messages. */
   botLoopProtection?: ChannelBotLoopProtectionConfig;
   /**

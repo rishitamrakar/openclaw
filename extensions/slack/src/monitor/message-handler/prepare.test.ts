@@ -1191,6 +1191,21 @@ Second paragraph should still reach the agent after Slack's preview cutoff.`;
     expect(members).toHaveBeenCalledTimes(1);
   });
 
+  it('allows bot-authored room messages without owner presence when allowBots is "all"', async () => {
+    const { slackCtx, members } = createOwnerScopedBotRoomCtx({ members: ["UOTHER"] });
+
+    const prepared = await prepareMessageWith(
+      slackCtx,
+      createSlackAccount({ allowBots: "all" }),
+      createBotRoomMessage(),
+    );
+
+    assertPrepared(prepared);
+    expect(prepared.ctxPayload.RawBody).toContain("Readiness probe failed");
+    // "all" skips the room authorization gate entirely — no member lookup.
+    expect(members).not.toHaveBeenCalled();
+  });
+
   it("forwards bot sender status to ctxPayload when allowBots admits the bot", async () => {
     const { slackCtx } = createOwnerScopedBotRoomCtx({ members: ["UOWNER"] });
 

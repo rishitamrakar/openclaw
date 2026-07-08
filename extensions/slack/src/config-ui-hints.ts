@@ -44,7 +44,7 @@ export const slackChannelConfigUiHints = {
   },
   allowBots: {
     label: "Slack Allow Bot Messages",
-    help: "Allow bot-authored messages to trigger Slack replies (default: false).",
+    help: 'Allow bot-authored messages to trigger Slack replies (default: false). `true` keeps the room authorization gate (per-room `users` allowlist or owner presence); `"all"` accepts any bot sender without that gate; `"mentions"` additionally requires a mention.',
   },
   botLoopProtection: {
     label: "Slack Bot Loop Protection",

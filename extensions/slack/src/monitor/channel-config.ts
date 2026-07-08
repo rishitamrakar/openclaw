@@ -18,7 +18,7 @@ export type SlackChannelConfigResolved = {
   requireMention: boolean;
   ignoreOtherMentions?: boolean;
   replyToMode?: ReplyToMode;
-  allowBots?: boolean | "mentions";
+  allowBots?: boolean | "mentions" | "all";
   botLoopProtection?: ChannelBotLoopProtectionConfig;
   users?: Array<string | number>;
   skills?: string[];
@@ -32,7 +32,7 @@ type SlackChannelConfigEntry = {
   requireMention?: boolean;
   ignoreOtherMentions?: boolean;
   replyToMode?: ReplyToMode;
-  allowBots?: boolean | "mentions";
+  allowBots?: boolean | "mentions" | "all";
   botLoopProtection?: ChannelBotLoopProtectionConfig;
   users?: Array<string | number>;
   skills?: string[];
