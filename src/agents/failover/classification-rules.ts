@@ -312,6 +312,8 @@ export function classifyFailoverReasonFromCode(raw: string | undefined): Failove
     return null;
   }
   switch (normalized) {
+    case "DEGENERATE_OUTPUT":
+      return "server_error";
     case "UNKNOWN_PARAMETER":
       return "format";
     case "RESOURCE_EXHAUSTED":
