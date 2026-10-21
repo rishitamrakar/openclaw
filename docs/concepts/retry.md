@@ -47,7 +47,7 @@ A Responses stream that ends before its terminal event also qualifies for transi
 
 If a Responses request reaches its output-token limit while generating a tool call, the embedded runner also continues automatically from recorded results after admitted tools settle. It keeps the same model and account, preserves completed actions, and never executes partial arguments. This continuation shares the retry-count budget and run deadline, but not the 90-second outage window: generating a full response can take longer than that. Cancellation, pending approval, active asynchronous work, and intentional tool termination still stop continuation. Provider refusals and unknown incomplete-response reasons do not qualify.
 
-Responses tool calls that accumulate 32 KiB of consecutive trailing whitespace are aborted early and qualify for the same bounded transient recovery. This limit applies to the whitespace run, not the total argument size.
+Responses tool calls that accumulate 4 KiB of consecutive trailing whitespace are aborted early and qualify for the same bounded transient recovery. This limit applies to the whitespace run, not the total argument size.
 
 Exhausted subscription, daily, weekly, or monthly usage windows go directly to eligible auth-profile or model fallback. A `Retry-After` value alone does not establish usage-window exhaustion: temporary throttles still honor the provider's minimum wait up to the saved `retry.provider.maxRetryDelayMs` (default 60 seconds). A rate-limit floor longer than that cap goes directly to fallback when one is configured, since the operator has already said how long a server-requested wait may hold the run; with no fallback configured the floor is honored in full, and `maxRetryDelayMs: 0` disables the cap.
 
