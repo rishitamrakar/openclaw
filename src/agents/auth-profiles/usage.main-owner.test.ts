@@ -17,7 +17,10 @@ import { noteCommittedSharedAuthStoreOwnership } from "./path-resolve.js";
 import { loadPersistedAuthProfileStore } from "./persisted.js";
 import { markAuthProfileSuccess } from "./profiles.js";
 import { clearRuntimeAuthProfileStoreSnapshots } from "./runtime-snapshots.js";
-import { SHARED_AUTH_CELL_KEYS, SHARED_AUTH_STORE_STATE_KEY } from "./sqlite-json.js";
+import { SHARED_AUTH_STORE_STATE_KEY } from "./sqlite-json.js";
+
+// 2026.10.7 does not export SHARED_AUTH_CELL_KEYS; same values as sqlite-json.ts.
+const SHARED_AUTH_CELL_KEYS = { store: "authProfiles.store", state: "authProfiles.state" };
 import { ensureAuthProfileStore, saveAuthProfileStore } from "./store-runtime.js";
 import type { AuthProfileStore, ProfileUsageStats } from "./types.js";
 
@@ -97,7 +100,7 @@ describe("main-agent auth-profile usage", () => {
   function readPersistedState(location: Location): PersistedState | undefined {
     return location === "state-db"
       ? readConfigMachineState<PersistedState>(SHARED_AUTH_CELL_KEYS.state)
-      : loadPersistedAuthProfileStore(mainAgentDir);
+      : (loadPersistedAuthProfileStore(mainAgentDir) ?? undefined);
   }
 
   it.each(["agent-db", "state-db"] as const)(
