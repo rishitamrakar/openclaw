@@ -677,14 +677,25 @@ export const streamSimpleOpenAICodexResponses: StreamFunction<
   return streamOpenAICodexResponses(model, context, resolvedOptions);
 };
 
+// gpt-6.2 never caches top-level `instructions` on the ChatGPT route (#202372). This release has
+// no catalog row with compat.cachesInstructions, so match those models by id; an explicit flag wins.
+function resolveCachesInstructions(model: Model<"openai-chatgpt-responses">): boolean {
+  const flag = model.compat?.cachesInstructions;
+  if (typeof flag === "boolean") {
+    return flag;
+  }
+  return !/^gpt-6\.2(?:-|$)/.test(model.id);
+}
+
 function buildRequestBody(
   model: Model<"openai-chatgpt-responses">,
   context: Context,
   options?: OpenAICodexResponsesOptions,
   replayMode: OpenAIResponsesReplayMode = "checkpoint",
 ): RequestBody {
+  const cachesInstructions = resolveCachesInstructions(model);
   const messages = convertResponsesMessages(model, context, CODEX_TOOL_CALL_PROVIDERS, {
-    includeSystemPrompt: false,
+    includeSystemPrompt: !cachesInstructions,
     replayResponsesItemIds: false,
     sessionId: options?.sessionId,
     authProfileId: options?.authProfileId,
@@ -695,8 +706,13 @@ function buildRequestBody(
     model: model.id,
     store: false,
     stream: true,
-    instructions:
-      stripSystemPromptCacheBoundary(context.systemPrompt ?? "") || "You are a helpful assistant.",
+    ...(cachesInstructions
+      ? {
+          instructions:
+            stripSystemPromptCacheBoundary(context.systemPrompt ?? "") ||
+            "You are a helpful assistant.",
+        }
+      : {}),
     input: messages,
     text: { verbosity: options?.textVerbosity || "low" },
     include: ["reasoning.encrypted_content"],

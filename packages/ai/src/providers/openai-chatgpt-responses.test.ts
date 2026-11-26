@@ -357,6 +357,62 @@ describe("streamOpenAICodexResponses transport", () => {
     },
   );
 
+  it("sends system prompt in input and omits instructions when cachesInstructions is false", async () => {
+    const payload = await capturePayload(
+      {
+        systemPrompt: "You are an autonomous agent.",
+        messages: [{ role: "user", content: "hello", timestamp: 1 }],
+      },
+      {},
+      {
+        ...model,
+        id: "gpt-5.6-sol",
+        reasoning: true,
+        compat: { cachesInstructions: false },
+      },
+    );
+    expect(payload).not.toHaveProperty("instructions");
+    expect((payload.input as unknown[])[0]).toMatchObject({
+      type: "message",
+      role: "developer",
+      content: [{ type: "input_text", text: "You are an autonomous agent." }],
+    });
+  });
+
+  it.each(["gpt-6.2-sol", "gpt-6.2-astra"])(
+    "defaults %s to the system prompt in input",
+    async (id) => {
+      const payload = await capturePayload(
+        {
+          systemPrompt: "You are an autonomous agent.",
+          messages: [{ role: "user", content: "hello", timestamp: 1 }],
+        },
+        {},
+        { ...model, id, reasoning: true },
+      );
+      expect(payload).not.toHaveProperty("instructions");
+      expect((payload.input as unknown[])[0]).toMatchObject({ role: "developer" });
+    },
+  );
+
+  it.each([
+    { id: "gpt-6.1-sol", compat: undefined },
+    { id: "gpt-6.2-sol", compat: { cachesInstructions: true } },
+  ])("keeps system prompt in instructions for $id compat=$compat", async ({ id, compat }) => {
+    const payload = await capturePayload(
+      {
+        systemPrompt: "You are an autonomous agent.",
+        messages: [{ role: "user", content: "hello", timestamp: 1 }],
+      },
+      {},
+      { ...model, id, reasoning: true, ...(compat ? { compat } : {}) },
+    );
+    expect(payload.instructions).toBe("You are an autonomous agent.");
+    expect(payload.input).not.toEqual(
+      expect.arrayContaining([expect.objectContaining({ type: "message", role: "developer" })]),
+    );
+  });
+
   it("sends strict structured output without adding tools", async () => {
     const format = {
       name: "reef_guard_verdict",
